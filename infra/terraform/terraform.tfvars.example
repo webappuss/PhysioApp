@@ -1,0 +1,37 @@
+# Copy this to terraform.tfvars and fill in the values
+# NEVER commit terraform.tfvars to git
+
+aws_region  = "ap-south-1"
+environment = "production"
+project     = "physioconnect"
+
+# Networking
+vpc_cidr             = "10.0.0.0/16"
+public_subnet_cidrs  = ["10.0.1.0/24", "10.0.2.0/24"]
+private_subnet_cidrs = ["10.0.11.0/24", "10.0.12.0/24"]
+availability_zones   = ["ap-south-1a", "ap-south-1b"]
+
+# EC2
+api_instance_type = "t3.medium"
+api_ami_id        = "ami-0f58b397bc5c1f2e8"   # Amazon Linux 2023 ap-south-1 (verify latest)
+key_pair_name     = "physioconnect-key"         # create with: aws ec2 create-key-pair --key-name physioconnect-key
+
+# RDS
+db_instance_class    = "db.t3.medium"
+db_name              = "physioconnect"
+db_username          = "physio"
+db_password          = "CHANGE_ME_STRONG_PASSWORD"  # min 16 chars, letters+numbers+symbols
+db_allocated_storage = 20
+
+# ElastiCache Redis
+redis_node_type  = "cache.t3.micro"
+redis_auth_token = "CHANGE_ME_REDIS_TOKEN"      # min 16 chars, no @ or /
+
+# Domain & SSL
+api_domain                = "api.physioconnect.in"
+admin_domain              = "admin.physioconnect.in"
+acm_certificate_arn       = "arn:aws:acm:ap-south-1:ACCOUNT_ID:certificate/CERT_ID"  # for ALB
+admin_acm_certificate_arn = "arn:aws:acm:us-east-1:ACCOUNT_ID:certificate/CERT_ID"  # for CloudFront (must be us-east-1)
+
+# Monitoring (optional — create SNS topic first)
+sns_alarm_arn = ""  # arn:aws:sns:ap-south-1:ACCOUNT_ID:physioconnect-alerts

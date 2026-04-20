@@ -1,9 +1,8 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import '../config/app_config.dart';
 import '../storage/secure_storage.dart';
-
-const _baseUrl = 'https://api.physioconnect.in/api/v1';
 
 final apiClientProvider = Provider<ApiClient>((ref) {
   final storage = ref.watch(secureStorageProvider);
@@ -16,7 +15,7 @@ class ApiClient {
 
   ApiClient(this._storage) {
     _dio = Dio(BaseOptions(
-      baseUrl: _baseUrl,
+      baseUrl: AppConfig.apiBaseUrl,
       connectTimeout: const Duration(seconds: 15),
       receiveTimeout: const Duration(seconds: 30),
       headers: {'Content-Type': 'application/json', 'Accept': 'application/json'},

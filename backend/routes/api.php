@@ -19,6 +19,36 @@ use Illuminate\Support\Facades\Route;
 |--------------------------------------------------------------------------
 */
 
+// ─── HEALTH CHECK (outside v1 prefix, no auth, used by ALB + deploy script) ──
+Route::get('health', function () {
+    $checks = [];
+
+    // DB connectivity
+    try {
+        \DB::connection()->getPdo();
+        $checks['database'] = 'ok';
+    } catch (\Throwable) {
+        $checks['database'] = 'error';
+    }
+
+    // Cache/Redis connectivity
+    try {
+        \Cache::put('_health', 1, 5);
+        $checks['cache'] = 'ok';
+    } catch (\Throwable) {
+        $checks['cache'] = 'error';
+    }
+
+    $healthy = ! in_array('error', $checks);
+
+    return response()->json([
+        'status'  => $healthy ? 'ok' : 'degraded',
+        'checks'  => $checks,
+        'version' => config('app.version', '1.0.0'),
+        'env'     => config('app.env'),
+    ], $healthy ? 200 : 503);
+});
+
 Route::prefix('v1')->group(function () {
 
     // ─── AUTH (public) ────────────────────────────────────────────────────
