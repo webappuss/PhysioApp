@@ -13,6 +13,10 @@ import '../../features/booking/screens/my_bookings_screen.dart';
 import '../../features/profile/screens/profile_screen.dart';
 import '../../features/checkin/screens/checkin_screen.dart';
 import '../../features/payment/screens/payment_screen.dart';
+import '../../features/exercise/screens/rehab_plans_screen.dart';
+import '../../features/exercise/screens/rehab_plan_detail_screen.dart';
+import '../../features/exercise/screens/exercise_detail_screen.dart';
+import '../../features/exercise/models/exercise_model.dart';
 import '../shell/main_shell.dart';
 
 final appRouterProvider = Provider<GoRouter>((ref) {
@@ -67,6 +71,18 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/payment/:bookingId',
         builder: (_, state) => PaymentScreen(bookingId: int.parse(state.pathParameters['bookingId']!)),
+      ),
+      GoRoute(
+        path: '/rehab-plans',
+        builder: (_, __) => const RehabPlansScreen(),
+      ),
+      GoRoute(
+        path: '/rehab-plans/:id',
+        builder: (_, state) => RehabPlanDetailScreen(planId: int.parse(state.pathParameters['id']!)),
+      ),
+      GoRoute(
+        path: '/exercises/:id',
+        builder: (_, state) => ExerciseDetailScreen(exercise: state.extra as Exercise),
       ),
     ],
   );

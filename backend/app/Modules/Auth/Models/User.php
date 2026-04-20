@@ -17,6 +17,7 @@ class User extends Authenticatable
         'uuid', 'phone', 'email', 'name', 'role', 'status',
         'lang_preference', 'avatar_url', 'last_login_at',
         'phone_verified_at', 'email_verified_at',
+        'fcm_token', 'device_platform',
     ];
 
     protected $hidden = ['remember_token'];

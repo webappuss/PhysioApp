@@ -82,6 +82,7 @@ Route::prefix('v1')->group(function () {
 
         // ── PATIENT ───────────────────────────────────────────────────────
         Route::middleware('role:patient')->prefix('patient')->group(function () {
+            Route::post('fcm-token',      [PatientController::class, 'updateFcmToken']);
             Route::get('profile',         [PatientController::class, 'profile']);
             Route::put('profile',         [PatientController::class, 'updateProfile']);
             Route::get('dashboard',       [PatientController::class, 'dashboard']);
@@ -95,6 +96,7 @@ Route::prefix('v1')->group(function () {
 
         // ── PHYSIOTHERAPIST ───────────────────────────────────────────────
         Route::middleware('role:physiotherapist')->prefix('physio')->group(function () {
+            Route::post('fcm-token',                [PhysioController::class, 'updateFcmToken']);
             Route::get('profile',                   [PhysioController::class, 'profile']);
             Route::put('profile',                   [PhysioController::class, 'updateProfile']);
             Route::get('availability',              [PhysioController::class, 'availability']);

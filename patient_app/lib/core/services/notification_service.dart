@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
@@ -56,7 +58,10 @@ class NotificationService {
 
   Future<void> _sendTokenToServer(String token) async {
     try {
-      await _api.post('/patient/fcm-token', data: {'fcm_token': token, 'platform': 'android'});
+      await _api.post('/patient/fcm-token', data: {
+        'fcm_token': token,
+        'platform': Platform.isIOS ? 'ios' : 'android',
+      });
     } catch (_) {
       // Non-critical — retry on next launch
     }

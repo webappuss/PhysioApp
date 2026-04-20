@@ -131,4 +131,19 @@ class PatientController extends Controller
             'data'    => $this->patientService->getOutcomeScores($request->user(), $code),
         ]);
     }
+
+    public function updateFcmToken(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'fcm_token' => 'required|string|max:512',
+            'platform'  => 'required|in:android,ios',
+        ]);
+
+        $request->user()->update([
+            'fcm_token'    => $validated['fcm_token'],
+            'device_platform' => $validated['platform'],
+        ]);
+
+        return response()->json(['success' => true]);
+    }
 }

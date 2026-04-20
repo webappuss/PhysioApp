@@ -18,6 +18,8 @@ return new class extends Migration
             $table->enum('status', ['pending', 'active', 'suspended', 'deleted'])->default('pending');
             $table->enum('lang_preference', ['en', 'hi', 'gu'])->default('en');
             $table->string('avatar_url', 500)->nullable();
+            $table->string('fcm_token', 512)->nullable();
+            $table->enum('device_platform', ['android', 'ios'])->nullable();
             $table->timestamp('email_verified_at')->nullable();
             $table->timestamp('phone_verified_at')->nullable();
             $table->timestamp('last_login_at')->nullable();

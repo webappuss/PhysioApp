@@ -257,7 +257,10 @@ class _TodayExercises extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               const Text("Today's Exercises", style: TextStyle(fontSize: 17, fontWeight: FontWeight.w600, color: AppTheme.textPrimary)),
-              Text('${exercises.length} exercises', style: const TextStyle(fontSize: 13, color: AppTheme.textSecondary)),
+              GestureDetector(
+                onTap: () => context.push('/rehab-plans'),
+                child: Text('See all', style: const TextStyle(fontSize: 13, color: AppTheme.primaryBlue, fontWeight: FontWeight.w600)),
+              ),
             ],
           ),
         ),
@@ -312,37 +315,47 @@ class _RehabPlanCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final progress = plan.currentPhase / plan.totalPhases;
-    return Container(
-      margin: const EdgeInsets.fromLTRB(20, 24, 20, 0),
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: AppTheme.cardWhite,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppTheme.divider),
-      ),
-      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            const Text('Rehab Plan', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: AppTheme.textSecondary)),
-            Text('Phase ${plan.currentPhase}/${plan.totalPhases}',
-              style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: AppTheme.primaryBlue)),
-          ],
+    return GestureDetector(
+      onTap: () => context.push('/rehab-plans/${plan.id}'),
+      child: Container(
+        margin: const EdgeInsets.fromLTRB(20, 24, 20, 0),
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: AppTheme.cardWhite,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: AppTheme.divider),
         ),
-        const SizedBox(height: 6),
-        Text(plan.title ?? plan.condition ?? 'Active Rehabilitation',
-          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: AppTheme.textPrimary)),
-        const SizedBox(height: 12),
-        ClipRRect(
-          borderRadius: BorderRadius.circular(4),
-          child: LinearProgressIndicator(
-            value: progress,
-            minHeight: 6,
-            backgroundColor: AppTheme.divider,
-            valueColor: const AlwaysStoppedAnimation(AppTheme.primaryBlue),
+        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Text('Rehab Plan', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: AppTheme.textSecondary)),
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text('Phase ${plan.currentPhase}/${plan.totalPhases}',
+                    style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: AppTheme.primaryBlue)),
+                  const SizedBox(width: 4),
+                  const Icon(Icons.chevron_right, size: 16, color: AppTheme.primaryBlue),
+                ],
+              ),
+            ],
           ),
-        ),
-      ]),
+          const SizedBox(height: 6),
+          Text(plan.title ?? plan.condition ?? 'Active Rehabilitation',
+            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: AppTheme.textPrimary)),
+          const SizedBox(height: 12),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(4),
+            child: LinearProgressIndicator(
+              value: progress,
+              minHeight: 6,
+              backgroundColor: AppTheme.divider,
+              valueColor: const AlwaysStoppedAnimation(AppTheme.primaryBlue),
+            ),
+          ),
+        ]),
+      ),
     );
   }
 }
