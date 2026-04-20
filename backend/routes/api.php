@@ -27,6 +27,9 @@ Route::prefix('v1')->group(function () {
         Route::post('verify-otp',   [AuthController::class, 'verifyOtp']);
     });
 
+    // ─── ADMIN LOGIN (email + password) ───────────────────────────────────
+    Route::post('admin/login', [AdminController::class, 'login']);
+
     // ─── PAYMENT WEBHOOK (public — verified by Razorpay signature) ────────
     Route::post('payments/webhook', [PaymentController::class, 'webhook']);
 

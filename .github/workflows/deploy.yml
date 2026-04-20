@@ -1,0 +1,76 @@
+name: Deploy to Production
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: Deploy to EC2
+    runs-on: ubuntu-22.04
+    environment: production
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id:     ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region:            ap-south-1
+
+      - name: Login to Amazon ECR
+        id: ecr-login
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build, tag, push API image
+        env:
+          ECR_REGISTRY: ${{ steps.ecr-login.outputs.registry }}
+          ECR_REPO:     physioconnect-api
+          IMAGE_TAG:    ${{ github.sha }}
+        run: |
+          docker build -t $ECR_REGISTRY/$ECR_REPO:$IMAGE_TAG \
+                       -t $ECR_REGISTRY/$ECR_REPO:latest \
+                       --target app ./backend
+          docker push $ECR_REGISTRY/$ECR_REPO:$IMAGE_TAG
+          docker push $ECR_REGISTRY/$ECR_REPO:latest
+
+      - name: Build & deploy admin panel to S3/CloudFront
+        env:
+          VITE_API_URL: ${{ secrets.API_URL }}
+        run: |
+          cd admin_panel
+          npm ci
+          VITE_API_URL=$VITE_API_URL npm run build
+          aws s3 sync dist/ s3://${{ secrets.ADMIN_S3_BUCKET }} --delete
+          aws cloudfront create-invalidation \
+            --distribution-id ${{ secrets.ADMIN_CF_DISTRIBUTION }} \
+            --paths "/*"
+
+      - name: Deploy to EC2 via SSM
+        run: |
+          aws ssm send-command \
+            --document-name "AWS-RunShellScript" \
+            --targets "Key=tag:Name,Values=physioconnect-api" \
+            --parameters 'commands=[
+              "cd /opt/physioconnect",
+              "aws ecr get-login-password --region ap-south-1 | docker login --username AWS --password-stdin ${{ steps.ecr-login.outputs.registry }}",
+              "docker pull ${{ steps.ecr-login.outputs.registry }}/physioconnect-api:latest",
+              "docker-compose -f docker-compose.prod.yml up -d --no-deps api",
+              "docker exec physioconnect_api php artisan migrate --force",
+              "docker exec physioconnect_api php artisan config:cache",
+              "docker exec physioconnect_api php artisan route:cache",
+              "docker exec physioconnect_api php artisan queue:restart"
+            ]' \
+            --region ap-south-1
+
+      - name: Notify on failure
+        if: failure()
+        run: |
+          echo "::error::Deployment failed for commit ${{ github.sha }}"

@@ -4,12 +4,44 @@ namespace App\Modules\Admin\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Modules\Admin\Services\AdminService;
+use App\Modules\Auth\Models\User;
+use App\Modules\Auth\Services\AuthService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
 
 class AdminController extends Controller
 {
-    public function __construct(private AdminService $adminService) {}
+    public function __construct(
+        private AdminService $adminService,
+        private AuthService  $authService,
+    ) {}
+
+    public function login(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'email'    => 'required|email',
+            'password' => 'required|string',
+        ]);
+
+        $user = User::where('email', $validated['email'])
+            ->whereIn('role', ['admin', 'super_admin'])
+            ->first();
+
+        if (! $user || ! Hash::check($validated['password'], $user->password ?? '')) {
+            return response()->json(['success' => false, 'message' => 'Invalid credentials.'], 401);
+        }
+
+        if ($user->status !== 'active') {
+            return response()->json(['success' => false, 'message' => 'Account is not active.'], 403);
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Login successful.',
+            'data'    => $this->authService->issueToken($user),
+        ]);
+    }
 
     public function dashboard(): JsonResponse
     {
@@ -30,8 +62,8 @@ class AdminController extends Controller
     public function verifyPhysio(Request $request, int $physioId): JsonResponse
     {
         $validated = $request->validate([
-            'decision' => 'required|in:approve,reject',
-            'notes'    => 'sometimes|string|max:500',
+            'action' => 'required|in:approve,reject',
+            'reason' => 'sometimes|string|max:500',
         ]);
 
         return response()->json([
@@ -40,8 +72,8 @@ class AdminController extends Controller
             'data'    => $this->adminService->verifyPhysio(
                 $request->user(),
                 $physioId,
-                $validated['decision'],
-                $validated['notes'] ?? null,
+                $validated['action'],
+                $validated['reason'] ?? null,
             ),
         ]);
     }

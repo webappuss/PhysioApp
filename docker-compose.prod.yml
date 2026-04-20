@@ -1,0 +1,57 @@
+version: '3.9'
+
+# Production compose — used on EC2. Images pulled from ECR.
+# Secrets injected from AWS Secrets Manager via environment.
+
+services:
+
+  api:
+    image: ${ECR_REGISTRY}/physioconnect-api:latest
+    container_name: physioconnect_api
+    restart: always
+    ports:
+      - "80:80"
+    env_file: .env.production
+    volumes:
+      - api_storage:/var/www/html/storage/app
+      - api_logs:/var/www/html/storage/logs
+    depends_on:
+      redis:
+        condition: service_healthy
+    logging:
+      driver: awslogs
+      options:
+        awslogs-region: ap-south-1
+        awslogs-group: /physioconnect/api
+        awslogs-stream: api
+    networks:
+      - physioconnect
+
+  redis:
+    image: redis:7-alpine
+    container_name: physioconnect_redis
+    restart: always
+    command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD}
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "--pass", "${REDIS_PASSWORD}", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    logging:
+      driver: awslogs
+      options:
+        awslogs-region: ap-south-1
+        awslogs-group: /physioconnect/redis
+    networks:
+      - physioconnect
+
+volumes:
+  api_storage:
+  api_logs:
+  redis_data:
+
+networks:
+  physioconnect:
+    driver: bridge

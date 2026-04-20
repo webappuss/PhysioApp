@@ -1,0 +1,98 @@
+version: '3.9'
+
+services:
+
+  # ── Laravel API ────────────────────────────────────────────────────────────
+  api:
+    build:
+      context: ./backend
+      target: app
+    container_name: physioconnect_api
+    restart: unless-stopped
+    ports:
+      - "8080:80"
+    environment:
+      APP_ENV: local
+      APP_KEY: ${APP_KEY}
+      APP_DEBUG: "true"
+      DB_HOST: db
+      DB_DATABASE: physioconnect
+      DB_USERNAME: physio
+      DB_PASSWORD: ${DB_PASSWORD:-secret}
+      REDIS_HOST: redis
+      QUEUE_CONNECTION: redis
+      CACHE_STORE: redis
+    volumes:
+      - ./backend:/var/www/html
+      - api_storage:/var/www/html/storage
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - physioconnect
+
+  # ── MySQL 8.0 ──────────────────────────────────────────────────────────────
+  db:
+    image: mysql:8.0
+    container_name: physioconnect_db
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: physioconnect
+      MYSQL_USER: physio
+      MYSQL_PASSWORD: ${DB_PASSWORD:-secret}
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-rootsecret}
+    volumes:
+      - db_data:/var/lib/mysql
+    ports:
+      - "3306:3306"
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "physio", "-p${DB_PASSWORD:-secret}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - physioconnect
+
+  # ── Redis ──────────────────────────────────────────────────────────────────
+  redis:
+    image: redis:7-alpine
+    container_name: physioconnect_redis
+    restart: unless-stopped
+    command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD:-redissecret}
+    volumes:
+      - redis_data:/data
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "--pass", "${REDIS_PASSWORD:-redissecret}", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - physioconnect
+
+  # ── Admin Panel (React) ────────────────────────────────────────────────────
+  admin:
+    image: node:20-alpine
+    container_name: physioconnect_admin
+    working_dir: /app
+    command: sh -c "npm install && npm run dev -- --host 0.0.0.0"
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./admin_panel:/app
+    environment:
+      VITE_API_URL: http://localhost:8080/api/v1
+    networks:
+      - physioconnect
+
+volumes:
+  db_data:
+  redis_data:
+  api_storage:
+
+networks:
+  physioconnect:
+    driver: bridge

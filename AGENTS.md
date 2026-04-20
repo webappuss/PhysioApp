@@ -13,9 +13,9 @@ Phase Target Completion: 2026-08-17
 ---
 
 ## LAST UPDATED
-Date: 2026-04-17 13:00
+Date: 2026-04-20 00:00
 Updated By: Claude AI Agent (claude/physioconnect-architecture-LnJ1d)
-Last Commit: (initial scaffold)
+Last Commit: feat: deployment infrastructure (Docker, CI/CD, seeders, admin login)
 
 ---
 
@@ -45,13 +45,40 @@ Last Commit: (initial scaffold)
 - [x] PHPUnit tests for Auth, Booking, and Payment endpoints
 
 ### Patient App (Flutter — `patient_app/`)
-- [ ] Not started
+- [x] Auth: OTP phone login with 60s countdown, +91 prefix, phone regex validation
+- [x] Dashboard: XP/streak gamification card, upcoming bookings, today's exercises
+- [x] Discovery: GPS-based physio search, type filters, slot picker
+- [x] Booking: 14-day date picker, session type selector, detail view, cancel dialog
+- [x] Check-in: Pain/mood/sleep/energy sliders with notes (+10 XP snackbar)
+- [x] Payment: Razorpay SDK, server-side signature verification
+- [x] Profile: View/edit personal & medical info, gamification stats, logout
 
 ### Physio App (Flutter — `physio_app/`)
-- [ ] Not started
+- [x] Auth: OTP phone login with physio role
+- [x] Dashboard: earnings gradient card, today's sessions, upcoming appointments
+- [x] Bookings: list + detail with confirm/start/complete/cancel actions
+- [x] SOAP Notes: S/O/A/P + home exercise program with session creation
+- [x] Patients: list with last visit and session count
+- [x] Availability: weekly schedule editor with time pickers, slot duration
+- [x] Profile: verification status banner, fees, specializations, edit sheet, logout
 
 ### Admin Panel (React — `admin_panel/`)
-- [ ] Not started
+- [x] Auth: email/password login, Zustand persistent session, 401 auto-logout
+- [x] Layout: sidebar with NavLinks, user badge, logout
+- [x] Dashboard: total/monthly revenue cards, 6 KPI stat tiles
+- [x] Verification Queue: pending physios, approve/reject with reason dialog
+- [x] Bookings: searchable/filterable table with status and payment badges
+- [x] Users: role-filtered table with status indicators
+- [x] Revenue Analytics: Recharts area + bar charts (monthly revenue, by type, transactions)
+
+### Deployment Infrastructure
+- [x] Backend Dockerfile (PHP 8.3-fpm-alpine, nginx, supervisor, opcache)
+- [x] docker-compose.yml (local dev: API + MySQL 8 + Redis + admin panel)
+- [x] docker-compose.prod.yml (production: ECR images, AWS CloudWatch logging)
+- [x] GitHub Actions CI: Laravel tests + MySQL, TypeScript build, Docker build check
+- [x] GitHub Actions Deploy: ECR push + S3/CloudFront admin + EC2 SSM deploy
+- [x] Database seeders: ExerciseSeeder (20 evidence-based exercises), MilestoneSeeder (14 achievements), DemoPhysioSeeder (10 Ahmedabad physios)
+- [x] Admin email/password login endpoint (POST /api/v1/admin/login)
 
 ---
 
@@ -59,19 +86,21 @@ Last Commit: (initial scaffold)
 
 | Task | Developer | Started | Branch | ETA |
 |------|-----------|---------|--------|-----|
-| Phase 1 backend complete | Claude Agent | 2026-04-17 | claude/physioconnect-architecture-LnJ1d | 2026-04-17 |
+| AWS environment provisioning | DevOps | — | — | TBD |
 
 ---
 
 ## WHAT IS NEXT 📋 (Priority Order)
 
-1. [ ] Migrate & seed database (run `php artisan migrate --seed`)
-2. [ ] Stand up EC2 + RDS environment (AWS Phase 1 spec)
-3. [ ] Flutter patient app — OTP login + physio discovery
-4. [ ] Flutter physio app — onboarding + booking management
-5. [ ] React admin panel — verification queue + dashboard
-6. [ ] Beta launch: onboard 30 physios in Ahmedabad
-7. [ ] Phase 2 starts only after 200 active users (CRITICAL RULE)
+1. [ ] Provision EC2 (t3.medium) + RDS MySQL 8 (db.t3.medium) + ElastiCache Redis in ap-south-1
+2. [ ] Push ECR image, set .env.production, run `php artisan migrate --seed` on server
+3. [ ] Register `api.physioconnect.in` → EC2 load balancer with ACM SSL cert
+4. [ ] Deploy admin panel to S3 + CloudFront at `admin.physioconnect.in`
+5. [ ] Configure GitHub Actions secrets (AWS_ACCESS_KEY_ID, ECR, Razorpay, etc.)
+6. [ ] Run `php artisan db:seed --class=DemoPhysioSeeder` for 10 Ahmedabad demo physios
+7. [ ] Submit patient_app and physio_app to Play Store (internal testing track)
+8. [ ] Beta launch: onboard 30 physios in Ahmedabad
+9. [ ] Phase 2 starts only after 200 active users (CRITICAL RULE)
 
 ---
 

@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 
 class AdminUserSeeder extends Seeder
@@ -14,6 +15,7 @@ class AdminUserSeeder extends Seeder
             'uuid'               => Str::uuid(),
             'phone'              => '9000000000',
             'email'              => 'admin@physioconnect.in',
+            'password'           => Hash::make(env('ADMIN_DEFAULT_PASSWORD', 'PhysioAdmin@2026!')),
             'name'               => 'Super Admin',
             'role'               => 'super_admin',
             'status'             => 'active',
