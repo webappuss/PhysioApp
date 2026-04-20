@@ -4,6 +4,7 @@ namespace App\Modules\Payment\Services;
 
 use App\Modules\Auth\Models\User;
 use App\Shared\Services\AuditLogger;
+use App\Shared\Services\NotificationService;
 use App\Shared\Services\RazorpayService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -13,8 +14,9 @@ use Illuminate\Validation\ValidationException;
 class PaymentService
 {
     public function __construct(
-        private RazorpayService $razorpayService,
-        private AuditLogger     $auditLogger,
+        private RazorpayService     $razorpayService,
+        private AuditLogger         $auditLogger,
+        private NotificationService $notificationService,
     ) {}
 
     public function createOrder(User $user, array $data): array
@@ -94,6 +96,12 @@ class PaymentService
         }
 
         $this->auditLogger->log($user, 'payment_verified', 'payments', $payment->id);
+
+        $this->notificationService->notifyPaymentSuccess($user->id, [
+            'amount'     => number_format($payment->amount / 100, 2),
+            'booking_id' => $payment->booking_id,
+            'uuid'       => $payment->uuid ?? '',
+        ]);
 
         return (array) DB::table('payments')->find($payment->id);
     }

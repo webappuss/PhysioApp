@@ -81,11 +81,16 @@ class NotificationService {
     switch (type) {
       case 'booking_confirmed':
       case 'booking_reminder':
+      case 'physio_en_route':
         if (id != null) _pendingRoute = '/bookings/$id';
+      case 'booking_cancelled':
+        _pendingRoute = '/bookings';
       case 'checkin_reminder':
         _pendingRoute = '/checkin';
       case 'payment_success':
         if (id != null) _pendingRoute = '/bookings/$id';
+      case 'session_completed':
+        _pendingRoute = '/rehab-plans';
     }
   }
 

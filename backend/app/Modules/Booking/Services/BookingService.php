@@ -76,10 +76,9 @@ class BookingService
             ->value('users.id');
 
         if ($physioUser) {
-            $this->notificationService->notifyBookingConfirmed(
-                $user->id,
+            $this->notificationService->notifyNewBookingRequest(
                 $physioUser,
-                ['date' => $data['scheduled_date'], 'time' => $data['scheduled_time'], 'uuid' => $booking->uuid]
+                ['date' => $data['scheduled_date'], 'time' => $data['scheduled_time'], 'uuid' => $booking->uuid, 'id' => $bookingId]
             );
         }
 
@@ -226,6 +225,16 @@ class BookingService
     private function confirmBooking(object $booking, User $user): array
     {
         abort_unless($booking->status === 'pending', 422, 'Only pending bookings can be confirmed.');
+
+        $patientUserId = DB::table('patient_profiles')->where('id', $booking->patient_id)->value('user_id');
+        if ($patientUserId) {
+            $this->notificationService->notifyBookingConfirmed(
+                $patientUserId,
+                $user->id,
+                ['date' => $booking->scheduled_date, 'time' => $booking->scheduled_time, 'uuid' => $booking->uuid]
+            );
+        }
+
         return ['status' => 'confirmed', 'confirmed_at' => now()];
     }
 
@@ -243,10 +252,17 @@ class BookingService
     {
         abort_unless(in_array($booking->status, ['arrived', 'in_session']), 422, 'Cannot complete this booking.');
 
-        // Increment physio total_sessions
         DB::table('physiotherapist_profiles')
             ->where('id', $booking->physio_id)
             ->increment('total_sessions');
+
+        $patientUserId = DB::table('patient_profiles')->where('id', $booking->patient_id)->value('user_id');
+        if ($patientUserId) {
+            $this->notificationService->notifySessionCompleted(
+                $patientUserId,
+                ['id' => $booking->id, 'uuid' => $booking->uuid]
+            );
+        }
 
         return ['status' => 'completed', 'completed_at' => now()];
     }
@@ -254,6 +270,20 @@ class BookingService
     private function cancelBooking(object $booking, User $user, array $data): array
     {
         abort_unless(in_array($booking->status, ['pending', 'confirmed']), 422, 'This booking cannot be cancelled.');
+
+        // Notify the other party
+        $bookingInfo = ['date' => $booking->scheduled_date, 'id' => $booking->id, 'uuid' => $booking->uuid];
+        if ($user->hasRole('patient')) {
+            $physioUserId = DB::table('physiotherapist_profiles')->where('id', $booking->physio_id)->value('user_id');
+            if ($physioUserId) {
+                $this->notificationService->notifyBookingCancelled($physioUserId, $user->name, $bookingInfo);
+            }
+        } else {
+            $patientUserId = DB::table('patient_profiles')->where('id', $booking->patient_id)->value('user_id');
+            if ($patientUserId) {
+                $this->notificationService->notifyBookingCancelled($patientUserId, $user->name, $bookingInfo);
+            }
+        }
 
         return [
             'status'              => 'cancelled',

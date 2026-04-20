@@ -7,6 +7,7 @@ import VerificationQueuePage from './pages/VerificationQueuePage'
 import BookingsPage from './pages/BookingsPage'
 import UsersPage from './pages/UsersPage'
 import RevenueAnalyticsPage from './pages/RevenueAnalyticsPage'
+import PaymentsPage from './pages/PaymentsPage'
 
 function PrivateRoute({ children }: { children: React.ReactNode }) {
   const token = useAuthStore((s) => s.token)
@@ -31,7 +32,8 @@ export default function App() {
           <Route path="verification" element={<VerificationQueuePage />} />
           <Route path="bookings"     element={<BookingsPage />} />
           <Route path="users"        element={<UsersPage />} />
-          <Route path="revenue"      element={<RevenueAnalyticsPage />} />
+          <Route path="revenue"       element={<RevenueAnalyticsPage />} />
+          <Route path="payments"      element={<PaymentsPage />} />
         </Route>
       </Routes>
     </BrowserRouter>

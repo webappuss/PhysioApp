@@ -8,6 +8,7 @@ import '../../features/dashboard/screens/dashboard_screen.dart';
 import '../../features/bookings/screens/bookings_screen.dart';
 import '../../features/bookings/screens/booking_detail_screen.dart';
 import '../../features/patients/screens/patients_screen.dart';
+import '../../features/patients/screens/patient_detail_screen.dart';
 import '../../features/sessions/screens/soap_notes_screen.dart';
 import '../../features/availability/screens/availability_screen.dart';
 import '../../features/profile/screens/profile_screen.dart';
@@ -52,6 +53,10 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         builder: (_, state) => SoapNotesScreen(bookingId: int.parse(state.pathParameters['bookingId']!)),
       ),
       GoRoute(path: '/availability', builder: (_, __) => const AvailabilityScreen()),
+      GoRoute(
+        path: '/patients/:id',
+        builder: (_, state) => PatientDetailScreen(patientId: int.parse(state.pathParameters['id']!)),
+      ),
     ],
   );
 });

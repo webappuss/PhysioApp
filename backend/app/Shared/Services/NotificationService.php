@@ -72,14 +72,50 @@ class NotificationService
         );
     }
 
+    public function notifyNewBookingRequest(int $physioUserId, array $bookingData): void
+    {
+        $this->sendPush(
+            $physioUserId,
+            'New Booking Request',
+            "New booking request for {$bookingData['date']} at {$bookingData['time']}. Confirm to accept.",
+            ['type' => 'new_booking', 'id' => (string) ($bookingData['id'] ?? ''), 'booking_uuid' => $bookingData['uuid']],
+        );
+    }
+
+    public function notifyBookingCancelled(int $notifyUserId, string $cancelledByName, array $bookingData): void
+    {
+        $this->sendPush(
+            $notifyUserId,
+            'Booking Cancelled',
+            "Your booking on {$bookingData['date']} was cancelled by {$cancelledByName}.",
+            ['type' => 'booking_cancelled', 'id' => (string) ($bookingData['id'] ?? ''), 'booking_uuid' => $bookingData['uuid']],
+        );
+    }
+
+    public function notifySessionCompleted(int $patientUserId, array $bookingData): void
+    {
+        $this->sendPush(
+            $patientUserId,
+            'Session Completed',
+            'Your session is complete. Check your rehab plan for today\'s exercises.',
+            ['type' => 'session_completed', 'id' => (string) ($bookingData['id'] ?? ''), 'booking_uuid' => $bookingData['uuid']],
+        );
+    }
+
+    public function notifyPaymentSuccess(int $patientUserId, array $paymentData): void
+    {
+        $this->sendPush(
+            $patientUserId,
+            'Payment Successful',
+            "Payment of ₹{$paymentData['amount']} received. Your booking is confirmed.",
+            ['type' => 'payment_success', 'id' => (string) ($paymentData['booking_id'] ?? ''), 'payment_uuid' => $paymentData['uuid'] ?? ''],
+        );
+    }
+
     private function getFcmTokens(int $userId): array
     {
-        // Fetch FCM tokens from a device_tokens table (simplified for Phase 1)
-        return \DB::table('device_tokens')
-            ->where('user_id', $userId)
-            ->where('is_active', true)
-            ->pluck('token')
-            ->toArray();
+        $token = \DB::table('users')->where('id', $userId)->value('fcm_token');
+        return $token ? [$token] : [];
     }
 
     private function persistNotification(int $userId, string $channel, string $title, string $body, array $data): void

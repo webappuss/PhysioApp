@@ -17,6 +17,7 @@ import '../../features/exercise/screens/rehab_plans_screen.dart';
 import '../../features/exercise/screens/rehab_plan_detail_screen.dart';
 import '../../features/exercise/screens/exercise_detail_screen.dart';
 import '../../features/exercise/models/exercise_model.dart';
+import '../../features/scores/screens/scores_screen.dart';
 import '../shell/main_shell.dart';
 
 final appRouterProvider = Provider<GoRouter>((ref) {
@@ -83,6 +84,10 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/exercises/:id',
         builder: (_, state) => ExerciseDetailScreen(exercise: state.extra as Exercise),
+      ),
+      GoRoute(
+        path: '/scores',
+        builder: (_, __) => const ScoresScreen(),
       ),
     ],
   );

@@ -65,6 +65,7 @@ class NotificationService {
 
     switch (type) {
       case 'new_booking':
+      case 'booking_confirmed':
       case 'booking_reminder':
         if (id != null) _pendingRoute = '/bookings/$id';
       case 'booking_cancelled':

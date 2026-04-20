@@ -2,7 +2,7 @@ import { Outlet, NavLink, useNavigate } from 'react-router-dom'
 import { useAuthStore } from '../store/authStore'
 import {
   LayoutDashboard, ShieldCheck, CalendarDays,
-  Users, TrendingUp, LogOut, Activity,
+  Users, TrendingUp, LogOut, Activity, CreditCard,
 } from 'lucide-react'
 import clsx from 'clsx'
 
@@ -10,6 +10,7 @@ const NAV = [
   { to: '/dashboard',    label: 'Dashboard',    icon: LayoutDashboard },
   { to: '/verification', label: 'Verification',  icon: ShieldCheck },
   { to: '/bookings',     label: 'Bookings',      icon: CalendarDays },
+  { to: '/payments',     label: 'Payments',      icon: CreditCard },
   { to: '/users',        label: 'Users',         icon: Users },
   { to: '/revenue',      label: 'Revenue',       icon: TrendingUp },
 ]
