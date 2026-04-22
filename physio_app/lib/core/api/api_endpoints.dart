@@ -23,4 +23,9 @@ class ApiEndpoints {
   static const sessions = '/sessions';
   static String sessionDetail(int id)  => '/sessions/$id';
   static String soapNotes(int id)      => '/sessions/$id/soap';
+
+  static const rehabPlans = '/rehab-plans';
+  static String rehabPlanDetail(int id)     => '/rehab-plans/$id';
+  static String rehabPlanAddExercise(int id)=> '/rehab-plans/$id/exercises';
+  static const exercises = '/exercises';
 }

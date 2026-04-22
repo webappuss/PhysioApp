@@ -108,6 +108,16 @@ class _ProfileBody extends StatelessWidget {
         ),
         const SizedBox(height: 10),
         OutlinedButton.icon(
+          onPressed: () => context.push('/earnings'),
+          icon: const Icon(Icons.account_balance_wallet_outlined, color: AppTheme.primaryGreen),
+          label: const Text('My Earnings', style: TextStyle(color: AppTheme.primaryGreen)),
+          style: OutlinedButton.styleFrom(
+            side: const BorderSide(color: AppTheme.primaryGreen),
+            padding: const EdgeInsets.symmetric(vertical: 14),
+          ),
+        ),
+        const SizedBox(height: 10),
+        OutlinedButton.icon(
           onPressed: onLogout,
           icon: const Icon(Icons.logout, color: AppTheme.errorRed),
           label: const Text('Logout', style: TextStyle(color: AppTheme.errorRed)),

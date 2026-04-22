@@ -131,11 +131,20 @@ class AdminController extends Controller
     public function payments(Request $request): JsonResponse
     {
         $payments = \DB::table('payments')
-            ->join('patient_profiles', 'payments.patient_id', '=', 'patient_profiles.id')
-            ->join('users', 'patient_profiles.user_id', '=', 'users.id')
-            ->select('payments.*', 'users.name as patient_name', 'users.phone as patient_phone')
+            ->leftJoin('patient_profiles', 'payments.patient_id', '=', 'patient_profiles.id')
+            ->leftJoin('users as pu', 'patient_profiles.user_id', '=', 'pu.id')
+            ->leftJoin('bookings', 'payments.booking_id', '=', 'bookings.id')
+            ->leftJoin('physiotherapist_profiles', 'bookings.physio_id', '=', 'physiotherapist_profiles.id')
+            ->leftJoin('users as phu', 'physiotherapist_profiles.user_id', '=', 'phu.id')
+            ->select(
+                'payments.*',
+                'pu.name as patient_name',
+                'pu.phone as patient_phone',
+                'phu.name as physio_name',
+            )
+            ->when($request->query('status'), fn ($q, $s) => $q->where('payments.status', $s))
             ->orderByDesc('payments.created_at')
-            ->paginate(25);
+            ->paginate(50);
 
         return response()->json([
             'success' => true,

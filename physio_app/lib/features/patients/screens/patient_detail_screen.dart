@@ -15,6 +15,22 @@ class PatientDetailScreen extends ConsumerWidget {
 
     return Scaffold(
       backgroundColor: AppTheme.bgLight,
+      floatingActionButton: detailAsync.whenOrNull(
+        data: (data) {
+          final patient = data['patient'] as Map<String, dynamic>? ?? {};
+          final name    = patient['name'] as String? ?? 'Patient';
+          return FloatingActionButton.extended(
+            onPressed: () => context.push(
+              '/patients/$patientId/create-rehab',
+              extra: {'name': name},
+            ),
+            backgroundColor: AppTheme.primaryGreen,
+            icon: const Icon(Icons.add, color: Colors.white),
+            label: const Text('New Rehab Plan',
+                style: TextStyle(color: Colors.white, fontWeight: FontWeight.w700)),
+          );
+        },
+      ),
       body: detailAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (e, _) => Center(

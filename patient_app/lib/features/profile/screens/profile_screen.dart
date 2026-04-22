@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import '../providers/profile_provider.dart';
 import '../models/profile_model.dart';
 import '../../auth/providers/auth_provider.dart';
@@ -79,6 +80,8 @@ class _ProfileBody extends StatelessWidget {
         _AvatarCard(profile: profile),
         const SizedBox(height: 20),
         _StatsRow(profile: profile),
+        const SizedBox(height: 20),
+        _QuickActions(),
         const SizedBox(height: 20),
         _InfoCard(profile: profile),
         const SizedBox(height: 20),
@@ -204,6 +207,104 @@ class _StatTile extends StatelessWidget {
       ]),
     ),
   );
+}
+
+class _QuickActions extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        color: AppTheme.cardWhite,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: AppTheme.divider),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 14, 16, 6),
+            child: Text('My Health',
+                style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: AppTheme.textPrimary)),
+          ),
+          _ActionTile(
+            icon: Icons.fitness_center_outlined,
+            color: AppTheme.primaryBlue,
+            label: 'Rehab Plans',
+            subtitle: 'View your exercise programs',
+            onTap: () => context.push('/rehab-plans'),
+          ),
+          _ActionTile(
+            icon: Icons.bar_chart_outlined,
+            color: const Color(0xFF7B61FF),
+            label: 'Outcome Scores',
+            subtitle: 'Track recovery progress',
+            onTap: () => context.push('/scores'),
+          ),
+          _ActionTile(
+            icon: Icons.checklist_outlined,
+            color: AppTheme.accentTeal,
+            label: 'Daily Check-in',
+            subtitle: 'Log pain, mood & sleep',
+            onTap: () => context.push('/checkin'),
+            showDivider: false,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ActionTile extends StatelessWidget {
+  final IconData icon;
+  final Color color;
+  final String label;
+  final String subtitle;
+  final VoidCallback onTap;
+  final bool showDivider;
+  const _ActionTile({
+    required this.icon, required this.color, required this.label,
+    required this.subtitle, required this.onTap, this.showDivider = true,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(14),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            child: Row(
+              children: [
+                Container(
+                  width: 38, height: 38,
+                  decoration: BoxDecoration(
+                    color: color.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Icon(icon, color: color, size: 20),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(label, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14)),
+                      Text(subtitle, style: const TextStyle(fontSize: 12, color: AppTheme.textSecondary)),
+                    ],
+                  ),
+                ),
+                const Icon(Icons.chevron_right, color: AppTheme.textSecondary, size: 18),
+              ],
+            ),
+          ),
+        ),
+        if (showDivider)
+          Divider(height: 1, indent: 66, color: AppTheme.divider),
+      ],
+    );
+  }
 }
 
 class _InfoCard extends StatelessWidget {
